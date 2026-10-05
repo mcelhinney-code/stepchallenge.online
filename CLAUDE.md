@@ -36,9 +36,16 @@ npm run db:migrate:remote  # production
 
 If the developer explicitly asks you to override this directive and merge or commit directly to `main`, you may do so.
 
+## Deployment policy
+
+Do **not** deploy to production automatically. Only run `npm run deploy` when the user explicitly asks you to.
+
+## Smoke tests
+
+Do not run local smoke tests automatically after every change. Only run them when the user explicitly asks for them.
+
 ## Before deploying
 
 1. Run `npx tsc --noEmit`.
-2. Run local smoke tests with `npm run dev`.
-3. Apply remote migrations if needed.
-4. Deploy with `npm run deploy`.
+2. Apply remote migrations if needed.
+3. Deploy with `npm run deploy` only when the user requests it.

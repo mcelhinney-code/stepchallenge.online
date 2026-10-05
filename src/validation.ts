@@ -6,11 +6,6 @@ export function getEmailDomain(email: string): string {
   return email.split('@').pop()?.toLowerCase() ?? '';
 }
 
-export function isAllowedDomain(email: string, allowedDomains: string[]): boolean {
-  const domain = getEmailDomain(email);
-  return allowedDomains.map((d) => d.toLowerCase()).includes(domain);
-}
-
 export function isValidPassword(password: string): boolean {
   return password.length >= 8 && password.length <= 128;
 }
@@ -33,12 +28,18 @@ export function isValidDate(dateStr: string): boolean {
   return date.getTime() <= today.getTime();
 }
 
-export function parseAllowedDomains(json: string): string[] {
-  try {
-    const parsed = JSON.parse(json);
-    if (Array.isArray(parsed)) return parsed.map((d) => String(d));
-  } catch {
-    // fall through
-  }
-  return [];
+export function isValidEventName(name: string): boolean {
+  return name.length >= 1 && name.length <= 120;
+}
+
+export function isValidTeamName(name: string): boolean {
+  return name.length >= 1 && name.length <= 100;
+}
+
+export function isValidTeamCount(count: number): boolean {
+  return Number.isInteger(count) && count >= 1 && count <= 100;
+}
+
+export function isValidOrganizationName(name: string): boolean {
+  return name.length >= 1 && name.length <= 100;
 }

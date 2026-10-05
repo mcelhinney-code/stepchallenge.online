@@ -1,3 +1,0 @@
-# Copy this file to .dev.vars and set a strong ADMIN_SECRET for local development.
-# Never commit .dev.vars to version control.
-ADMIN_SECRET=change-me-to-a-long-random-string

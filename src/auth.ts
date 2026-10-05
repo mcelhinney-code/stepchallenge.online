@@ -7,9 +7,8 @@ export interface SessionUser {
   userId: number;
   email: string;
   displayName: string | null;
-  teamId: number;
+  organizationId: number;
   role: string;
-  status: string;
 }
 
 function encodeText(s: string): Uint8Array {

@@ -1,0 +1,104 @@
+- generic [active] [ref=f4e1]:
+  - banner [ref=f4e2]:
+    - generic [ref=f4e3]:
+      - link "Step Challenge" [ref=f4e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=f4e5]:
+        - link "Dashboard" [ref=f4e6] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Profile" [ref=f4e7] [cursor=pointer]:
+          - /url: /profile
+        - link "Admin" [ref=f4e8] [cursor=pointer]:
+          - /url: /admin
+        - button "Toggle dark mode" [ref=f4e9] [cursor=pointer]
+        - button "Logout" [ref=f4e13] [cursor=pointer]
+  - main [ref=f4e17]:
+    - generic [ref=f4e19]:
+      - generic [ref=f4e20]:
+        - generic [ref=f4e21]:
+          - generic [ref=f4e22]:
+            - heading "Winter Challenge" [level=1] [ref=f4e23]
+            - generic [ref=f4e24]: Accepting participants
+          - paragraph [ref=f4e25]: Open event
+        - generic [ref=f4e26]:
+          - button "Start event" [ref=f4e27] [cursor=pointer]
+          - button "Delete event" [ref=f4e28] [cursor=pointer]
+      - generic [ref=f4e29]:
+        - heading "Teams" [level=2] [ref=f4e30]
+        - generic [ref=f4e31]:
+          - generic [ref=f4e32]:
+            - generic [ref=f4e33]: Number of teams
+            - spinbutton "Number of teams" [ref=f4e34]: "2"
+          - button "Regenerate teams" [ref=f4e35] [cursor=pointer]
+        - list [ref=f4e36]:
+          - listitem [ref=f4e37]:
+            - generic [ref=f4e38]: Apollo
+            - button "Edit" [ref=f4e39] [cursor=pointer]
+          - listitem [ref=f4e40]:
+            - generic [ref=f4e41]: Mercury
+            - button "Edit" [ref=f4e42] [cursor=pointer]
+        - generic [ref=f4e43]:
+          - generic [ref=f4e44]:
+            - generic [ref=f4e45]: New team name
+            - textbox "New team name" [ref=f4e46]:
+              - /placeholder: e.g. Marketing
+          - button "Create team" [ref=f4e47] [cursor=pointer]
+      - generic [ref=f4e48]:
+        - heading "Participants" [level=2] [ref=f4e49]
+        - table [ref=f4e51]:
+          - rowgroup [ref=f4e52]:
+            - row [ref=f4e53]:
+              - columnheader "Display name" [ref=f4e54]
+              - columnheader "Email" [ref=f4e55]
+              - columnheader "Team" [ref=f4e56]
+              - columnheader "Actions" [ref=f4e57]
+          - rowgroup [ref=f4e58]:
+            - row [ref=f4e59]:
+              - cell "Arely Reinger" [ref=f4e60]
+              - cell "arely.reinger@hubspot.com" [ref=f4e61]
+              - cell "Mercury" [ref=f4e62]
+              - cell [ref=f4e63]:
+                - generic [ref=f4e64]:
+                  - button "Change team" [ref=f4e65] [cursor=pointer]
+                  - button "Remove" [ref=f4e66] [cursor=pointer]
+            - row [ref=f4e67]:
+              - cell "Stephen McElhinney" [ref=f4e68]
+              - cell "smcelhinney@hubspot.com" [ref=f4e69]
+              - cell "Apollo" [ref=f4e70]
+              - cell [ref=f4e71]:
+                - generic [ref=f4e72]:
+                  - button "Change team" [ref=f4e73] [cursor=pointer]
+                  - button "Remove" [ref=f4e74] [cursor=pointer]
+        - generic [ref=f4e75]:
+          - generic [ref=f4e76]:
+            - generic [ref=f4e77]: User
+            - combobox "User" [ref=f4e78]:
+              - option "Select user" [selected]
+              - option "Alfred Dicki (alfred.dicki@hubspot.com)"
+              - option "Darby Pouros (darby.pouros@hubspot.com)"
+              - option "Delia Hintz (delia.hintz@hubspot.com)"
+              - option "Dereck Barrows (dereck.barrows@hubspot.com)"
+              - option "Elda Witting (elda.witting@hubspot.com)"
+              - option "Johann Wiegand (johann.wiegand@hubspot.com)"
+              - option "Katherine Walker (katherine.walker@hubspot.com)"
+              - option "Katlyn Friesen (katlyn.friesen@hubspot.com)"
+              - option "Korbin Schamberger-Daniel (korbin.schambergerdaniel@hubspot.com)"
+              - option "Liliana Nienow (liliana.nienow@hubspot.com)"
+              - option "Llewellyn Schmitt (llewellyn.schmitt@hubspot.com)"
+              - option "Lourdes Cronin (lourdes.cronin@hubspot.com)"
+              - option "Marlene Pagac (marlene.pagac@hubspot.com)"
+              - option "Pattie Will (pattie.will@hubspot.com)"
+              - option "Randal Runolfsdottir (randal.runolfsdottir@hubspot.com)"
+              - option "Rosalinda Mraz (rosalinda.mraz@hubspot.com)"
+              - option "Toy Howell (toy.howell@hubspot.com)"
+              - option "Trevion Morissette (trevion.morissette@hubspot.com)"
+              - option "Woodrow Will (woodrow.will@hubspot.com)"
+          - generic [ref=f4e79]:
+            - generic [ref=f4e80]: Team (optional)
+            - combobox "Team (optional)" [ref=f4e81]:
+              - option "Unassigned" [selected]
+              - option "Apollo"
+              - option "Mercury"
+          - button "Add participant" [ref=f4e83] [cursor=pointer]
+  - contentinfo [ref=f4e84]:
+    - generic [ref=f4e85]: Step Challenge — built for healthy competition.

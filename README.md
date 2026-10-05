@@ -1,6 +1,6 @@
 # Step Challenge
 
-A simple step-tracking application built for Cloudflare Workers. Users register with their work email, join a team, and log daily steps with an optional proof image.
+A simple step-tracking application built for Cloudflare Workers. Users register with their work email, admins assign them to event teams, and they log daily steps with an optional proof image.
 
 ## Tech stack
 
@@ -25,23 +25,15 @@ A simple step-tracking application built for Cloudflare Workers. Users register 
    npm install
    ```
 
-2. **Set local secrets**
-
-   ```bash
-   cp .dev.vars.example .dev.vars
-   ```
-
-   Edit `.dev.vars` and set a strong `ADMIN_SECRET`.
-
-3. **Apply local database migrations**
+2. **Apply local database migrations**
 
    The repo includes `wrangler.local.jsonc`, which uses placeholder IDs so it runs entirely offline.
 
    ```bash
-   npm run db:migrate:local:safe
+   npm run db:migrate:local
    ```
 
-4. **Start the dev server**
+3. **Start the dev server**
 
    ```bash
    npm run dev
@@ -53,19 +45,13 @@ This uses local emulators for D1, KV, and R2 (`wrangler.local.jsonc`) — nothin
 
 ## Deployment
 
-1. **Set remote secrets**
-
-   ```bash
-   npx wrangler secret put ADMIN_SECRET
-   ```
-
-2. **Apply remote database migrations**
+1. **Apply remote database migrations**
 
    ```bash
    npm run db:migrate:remote
    ```
 
-3. **Deploy**
+2. **Deploy**
 
    ```bash
    npm run deploy
@@ -73,25 +59,17 @@ This uses local emulators for D1, KV, and R2 (`wrangler.local.jsonc`) — nothin
 
 ## Admin access
 
-The admin panel is protected by the `ADMIN_SECRET`:
+Admin access is role-based. The first admin user is seeded in `migrations/0002_seed_org_and_admin.sql`. Log in with that account, then use the **Admin** link in the header to manage events, teams, participants, and users.
 
-```
-https://<your-domain>/admin?secret=<ADMIN_SECRET>
-```
+## Adding organizations
 
-The current secret is stored in `.dev.vars`.
-
-## Adding teams
-
-Teams and their allowed email domains are managed via D1 migrations.
-
-Create a new migration:
+Organizations and their allowed email domains are managed via D1 migrations for now. Create a new migration:
 
 ```bash
-npx wrangler d1 migrations create stepchallenge add_more_teams
+npx wrangler d1 migrations create stepchallenge add_organization
 ```
 
-Add `INSERT INTO teams ...` statements, then apply:
+Add `INSERT INTO organizations ...` statements, then apply:
 
 ```bash
 npm run db:migrate:remote
@@ -100,8 +78,8 @@ npm run db:migrate:remote
 Example:
 
 ```sql
-INSERT INTO teams (slug, name, allowed_domains)
-VALUES ('engineering', 'Engineering', '["company.com"]');
+INSERT INTO organizations (name, allowed_domain)
+VALUES ('HubSpot', 'hubspot.com');
 ```
 
 ## Notes

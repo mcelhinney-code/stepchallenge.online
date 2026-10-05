@@ -1,0 +1,70 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "Step Challenge" [ref=f3e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=f3e5]:
+        - link "Dashboard" [ref=f3e6] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Profile" [ref=f3e7] [cursor=pointer]:
+          - /url: /profile
+        - link "Admin" [ref=f3e8] [cursor=pointer]:
+          - /url: /admin
+        - button "Toggle dark mode" [ref=f3e9] [cursor=pointer]
+        - button "Logout" [ref=f3e13] [cursor=pointer]
+  - main [ref=f3e17]:
+    - generic [ref=f3e19]:
+      - heading "Admin" [level=1] [ref=f3e20]
+      - navigation [ref=f3e22]:
+        - link "Users" [ref=f3e23] [cursor=pointer]:
+          - /url: /admin/users
+        - link "Events" [ref=f3e24] [cursor=pointer]:
+          - /url: /admin/events
+      - generic [ref=f3e25]:
+        - generic [ref=f3e26]:
+          - heading "Events" [level=2] [ref=f3e27]
+          - table [ref=f3e29]:
+            - rowgroup [ref=f3e30]:
+              - row [ref=f3e31]:
+                - columnheader "Name" [ref=f3e32]
+                - columnheader "Description" [ref=f3e33]
+                - columnheader "Status" [ref=f3e34]
+                - columnheader "Starts" [ref=f3e35]
+                - columnheader "Ends" [ref=f3e36]
+            - rowgroup [ref=f3e37]:
+              - row [ref=f3e38]:
+                - cell [ref=f3e39]:
+                  - link "Winter Challenge" [ref=f3e40] [cursor=pointer]:
+                    - /url: /admin/events/7
+                - cell "Open event" [ref=f3e41]
+                - cell "Accepting participants" [ref=f3e42]
+                - cell "—" [ref=f3e44]
+                - cell "—" [ref=f3e45]
+              - row [ref=f3e46]:
+                - cell [ref=f3e47]:
+                  - link "Autumn Challenge" [ref=f3e48] [cursor=pointer]:
+                    - /url: /admin/events/6
+                - cell "Test event" [ref=f3e49]
+                - cell "Active" [ref=f3e50]
+                - cell "—" [ref=f3e52]
+                - cell "—" [ref=f3e53]
+        - generic [ref=f3e54]:
+          - heading "Create event" [level=2] [ref=f3e55]
+          - generic [ref=f3e56]:
+            - generic [ref=f3e57]:
+              - generic [ref=f3e58]: Event name
+              - textbox "Event name" [ref=f3e59]:
+                - /placeholder: e.g. Summer Step Challenge
+            - generic [ref=f3e60]:
+              - generic [ref=f3e61]: Description
+              - textbox "Description" [ref=f3e62]:
+                - /placeholder: Optional description
+            - generic [ref=f3e63]:
+              - generic [ref=f3e64]: Start date
+              - textbox "Start date" [ref=f3e65]
+            - generic [ref=f3e66]:
+              - generic [ref=f3e67]: End date
+              - textbox "End date" [ref=f3e68]
+            - button "Create event" [ref=f3e70] [cursor=pointer]
+  - contentinfo [ref=f3e71]:
+    - generic [ref=f3e72]: Step Challenge — built for healthy competition.

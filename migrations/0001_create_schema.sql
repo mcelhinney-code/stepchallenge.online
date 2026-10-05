@@ -1,29 +1,54 @@
-CREATE TABLE IF NOT EXISTS teams (
+CREATE TABLE organizations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  slug TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
-  allowed_domains TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE NOT NULL,
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  password_salt TEXT NOT NULL,
-  team_id INTEGER REFERENCES teams(id),
-  status TEXT NOT NULL DEFAULT 'pending',
-  role TEXT NOT NULL DEFAULT 'user',
+  allowed_domain TEXT NOT NULL UNIQUE,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS step_entries (
+CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  team_id INTEGER NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  password_salt TEXT NOT NULL,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id),
+  role TEXT NOT NULL DEFAULT 'user',
+  display_name TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  starts_at DATETIME,
+  ends_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE teams (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  UNIQUE(event_id, name)
+);
+
+CREATE TABLE event_participants (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  team_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(event_id, user_id)
+);
+
+CREATE TABLE step_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id INTEGER NOT NULL REFERENCES events(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  team_id INTEGER NOT NULL REFERENCES teams(id),
   entry_date DATE NOT NULL,
   steps INTEGER NOT NULL CHECK (steps > 0),
   image_key TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, entry_date)
+  UNIQUE(event_id, user_id, entry_date)
 );

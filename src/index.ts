@@ -19,12 +19,16 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-app.get('/', (c) => c.html(homePage()));
+app.get('/', (c) => {
+  const user = c.get('user');
+  if (user) return c.redirect('/dashboard');
+  return c.html(homePage());
+});
 app.route('/', authRoutes);
 app.route('/', entriesRoutes);
 app.route('/admin', adminRoutes);
 
-app.notFound((c) => c.html(notFoundPage(), 404));
+app.notFound((c) => c.html(notFoundPage(c.get('user')), 404));
 
 app.onError((err, c) => {
   console.error(err);
