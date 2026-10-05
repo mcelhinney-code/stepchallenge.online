@@ -10,6 +10,7 @@
     "db:migrate:local": "wrangler d1 migrations apply stepchallenge --local --config wrangler.local.jsonc",
     "db:migrate:remote": "wrangler d1 migrations apply stepchallenge --remote",
     "seed:users": "node scripts/seed-users.mjs",
+    "seed:event": "node scripts/seed-local-event.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

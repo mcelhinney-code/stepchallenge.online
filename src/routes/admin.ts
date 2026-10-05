@@ -6,22 +6,30 @@ import {
   createEvent,
   createEventParticipant,
   createTeam,
+  createUser,
   deleteEvent,
   deleteEventParticipant,
   deleteStepEntriesByEvent,
   deleteTeamsByEvent,
   getAllEvents,
   getAllUsers,
+  getDailyStepTotals,
   getEventById,
-  getEventLeaderboard,
+  getEventMemberTotals,
   getEventStats,
+  getEventsAcceptingParticipants,
+  getOrganizationById,
   getParticipantByUserAndEvent,
   getParticipantsByEvent,
   getParticipantsByTeam,
+  getStepEntriesByUserAndEvent,
   getStepEntryImageKeysByEvent,
   getTeamById,
   getTeamsByEvent,
+  getTeamStepTotals,
   getUserById,
+  getUserEvents,
+  getUserStepSummary,
   getUsersNotInEvent,
   resetParticipantTeams,
   startEvent,
@@ -38,7 +46,7 @@ import {
   isValidTeamName,
 } from '../validation';
 import { pickTeamNames } from '../teamNames';
-import { adminEventDetailPage, adminEventsPage, adminUsersPage, unauthorizedPage } from '../templates';
+import { adminEventDetailPage, adminEventsPage, adminUserDetailPage, adminUsersPage, unauthorizedPage } from '../templates';
 
 const admin = new Hono<AppEnv>();
 
@@ -90,11 +98,13 @@ admin.get('/events/:id', async (c) => {
   const event = await getEventById(c.env.DB, id);
   if (!event) return c.notFound();
 
-  const [teams, participants, usersNotInEvent, report, stats, pendingCount] = await Promise.all([
+  const [teams, participants, usersNotInEvent, memberTotals, teamTotals, dailyTotals, stats, pendingCount] = await Promise.all([
     getTeamsByEvent(c.env.DB, id),
     getParticipantsByEvent(c.env.DB, id),
     getUsersNotInEvent(c.env.DB, id),
-    getEventLeaderboard(c.env.DB, id),
+    getEventMemberTotals(c.env.DB, id),
+    getTeamStepTotals(c.env.DB, id),
+    getDailyStepTotals(c.env.DB, id),
     getEventStats(c.env.DB, id),
     countParticipantsByStatus(c.env.DB, id, 'joined'),
   ]);
@@ -110,7 +120,7 @@ admin.get('/events/:id', async (c) => {
 
   const flash = c.req.query('flash') ?? undefined;
   const error = c.req.query('error') ?? undefined;
-  return c.html(adminEventDetailPage(user, event, teams, participants, usersNotInEvent, report, stats, pendingCount, teamMembers, { flash, error }));
+  return c.html(adminEventDetailPage(user, event, teams, participants, usersNotInEvent, memberTotals, teamTotals, dailyTotals, stats, pendingCount, teamMembers, { flash, error }));
 });
 
 admin.post('/events/:id/teams', async (c) => {
@@ -471,6 +481,34 @@ admin.post('/users/:id/role', async (c) => {
 
   const users = await getAllUsers(c.env.DB);
   return c.html(adminUsersPage(adminUser, users, { flash: `${user.email} is now ${role}.` }));
+});
+
+admin.get('/users/:id', async (c) => {
+  const adminUser = c.get('user')!;
+  const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.notFound();
+  }
+
+  const user = await getUserById(c.env.DB, id);
+  if (!user) return c.notFound();
+
+  const [organization, events] = await Promise.all([
+    getOrganizationById(c.env.DB, user.organization_id),
+    getUserEvents(c.env.DB, id),
+  ]);
+
+  const eventData = await Promise.all(
+    events.map(async (event) => {
+      const [entries, summary] = await Promise.all([
+        getStepEntriesByUserAndEvent(c.env.DB, id, event.id, 10_000),
+        getUserStepSummary(c.env.DB, id, event.id),
+      ]);
+      return { event, entries, summary };
+    })
+  );
+
+  return c.html(adminUserDetailPage(adminUser, user, organization, eventData));
 });
 
 export default admin;

@@ -1,5 +1,5 @@
 import type { SessionUser } from './auth';
-import type { Event, StepEntry, Team, User } from './db';
+import type { Event, Organization, StepEntry, Team, User } from './db';
 
 function escapeHtml(str: string | number | null | undefined): string {
   if (str == null) return '';
@@ -62,7 +62,7 @@ function layout(
   </script>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans dark:bg-slate-950 dark:text-slate-100">
-  <div class="fixed inset-0 -z-10 block bg-cover bg-center bg-no-repeat dark:hidden" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHZpZXdCb3g9IjAgMCAxNDQwIDU2MCI+CiAgICA8ZyBtYXNrPSJ1cmwoJnF1b3Q7I1N2Z2pzTWFzazEwMDAmcXVvdDspIiBmaWxsPSJub25lIj4KICAgICAgICA8cmVjdCB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIHg9IjAiIHk9IjAiIGZpbGw9IiNmNGY3ZmUiPjwvcmVjdD4KICAgICAgICA8cGF0aCBkPSJNMTUzNiA1NjBMMCA1NjAgTDAgMzY1Ljk3UTIzLjU0IDI2OS41MSwgMTIwIDI5My4wNVExNjQuMSAyNjUuMTUsIDE5MiAzMDkuMjVRMjQzLjc4IDI4OS4wMywgMjY0IDM0MC44MVEzMDEuMzYgMjU4LjE3LCAzODQgMjk1LjUzUTQzNC44MiAyNzQuMzUsIDQ1NiAzMjUuMTdRNTM4LjkyIDI4OC4xLCA1NzYgMzcxLjAyUTYwNC4xNSAyNzkuMTcsIDY5NiAzMDcuMzNRNzc0LjMgMjY1LjYzLCA4MTYgMzQzLjk0UTg2Mi4yIDMxOC4xNCwgODg4IDM2NC4zNFE5MjkuMjkgMzMzLjYzLCA5NjAgMzc0LjkyUTk2NS43NiAzMDguNjksIDEwMzIgMzE0LjQ1UTEwODIuNTQgMjQ0Ljk5LCAxMTUyIDI5NS41MlExMjM5LjA1IDI2Mi41NywgMTI3MiAzNDkuNjJRMTMxOS43OCAzMjUuNCwgMTM0NCAzNzMuMTlRMTM2MS42NyAzMTguODYsIDE0MTYgMzM2LjUzUTE0ODIuNjkgMjgzLjIyLCAxNTM2IDM0OS45MXoiIGZpbGw9IiNlZWYzZmMiPjwvcGF0aD4KICAgICAgICA8cGF0aCBkPSJNMTQ4OCA1NjBMMCA1NjAgTDAgMzkxLjg4UTY0Ljc5IDMzNi42NywgMTIwIDQwMS40NlExOTIuMDYgMzUzLjUyLCAyNDAgNDI1LjU5UTI4My44OSAzOTcuNDgsIDMxMiA0NDEuMzdRMzQzLjE4IDM1Mi41NSwgNDMyIDM4My43M1E1MTUuMzggMzQ3LjExLCA1NTIgNDMwLjQ5UTYwMy4yIDM2MS42OSwgNjcyIDQxMi45UTcwMi44MyAzMjMuNzMsIDc5MiAzNTQuNTVRODcyLjE2IDMxNC43MiwgOTEyIDM5NC44OFE5NTYgMzY2Ljg4LCA5ODQgNDEwLjg5UTEwMzMuNjQgMzg4LjUzLCAxMDU2IDQzOC4xOFExMDc5LjE0IDM0MS4zMiwgMTE3NiAzNjQuNDZRMTIxOC42MyAzMzUuMDgsIDEyNDggMzc3LjcxUTEzMzAuMDIgMzM5LjczLCAxMzY4IDQyMS43NVExMzk2LjU2IDMzMC4zMSwgMTQ4OCAzNTguODZ6IiBmaWxsPSIjZGJlN2ZhIj48L3BhdGg+CiAgICAgICAgPHBhdGggZD0iTTE0NjQgNTYwTDAgNTYwIEwwIDQ0NS44NFE4OC4xMiA0MTMuOTYsIDEyMCA1MDIuMDhRMTQzLjQ3IDQ1My41NSwgMTkyIDQ3Ny4wMlEyMTQuNzIgNDI3Ljc0LCAyNjQgNDUwLjQ1UTMxNC41NiAzODEsIDM4NCA0MzEuNTZRNDQ2LjQ0IDQyMiwgNDU2IDQ4NC40M1E1MzEuNjIgNDQwLjA1LCA1NzYgNTE1LjY3UTYyOC44NyA0NDguNTQsIDY5NiA1MDEuNDFRNzQxLjk4IDQyNy4zOCwgODE2IDQ3My4zNlE4MzAuOTMgNDE2LjI5LCA4ODggNDMxLjIyUTkzMy44MSA0MDUuMDMsIDk2MCA0NTAuODQRMTA0OC43MiA0MTkuNTYsIDEwODAgNTA4LjI4UTEwOTkuOTggNDU2LjI1LCAxMTUyIDQ3Ni4yM1ExMTk2LjcxIDQwMC45NCwgMTI3MiA0NDUuNjVRMTMyMi44MSAzNzYuNDUsIDEzOTIgNDI3LjI2UTE0NDcuNzcgNDExLjAzLCAxNDY0IDQ2Ni44eiIgZmlsbD0iI2M2ZDlmNSI+PC9wYXRoPgogICAgICAgIDxwYXRoIGQ9Ik0xNTYwIDU2MEwwIDU2MCBMMCA1MzYuMzJRMzUuOTggNTAwLjMsIDcyIDUzNi4yN1ExMTkuMTkgNTExLjQ2LCAxNDQgNTU4LjY1UTE5MC43IDUzMy4zNSwgMjE2IDU4MC4wNFEyNTYuNzMgNTAwLjc2LCAzMzYgNTQxLjQ5UTM4NS43NiA0NzEuMjUsIDQ1NiA1MjEuMDFRNTEzLjI3IDUwNi4yOCwgNTI4IDU2My41NVE1ODAuNDMgNDk1Ljk4LCA2NDggNTQ4LjQxUTY2MS4xMiA0ODkuNTMsIDcyMCA1MDIuNjVRNzYxLjIyIDQ3MS44NywgNzkyIDUxMy4wOFE4NjkuNDIgNDcwLjUsIDkxMiA1NDcuOTNROTY3Ljg1IDUzMS43OCwgOTg0IDU4Ny42M1ExMDEyLjE5IDU0My44MiwgMTA1NiA1NzIuMDFRMTA4NS45NCA0ODEuOTUsIDExNzYgNTExLjlRMTIwNi43MiA0NzAuNjIsIDEyNDggNTAxLjM0UTEzMzIuNTMgNDY1Ljg3LCAxMzY4IDU1MC4zOVExMzg0LjY1IDQ5NS4wNCwgMTQ0MCA1MTEuNjlRMTUxMi45NyA0NjQuNjYsIDE1NjAgNTM3LjY0eiIgZmlsbD0iI2YxZjVmOSI+PC9wYXRoPgogICAgPC9nPgogICAgPGRlZnM+CiAgICAgICAgPG1hc2sgaWQ9IlN2Z2pzTWFzazEwMDAiPgogICAgICAgICAgICA8cmVjdCB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIGZpbGw9IiNmZmZmZmYiPjwvcmVjdD4KICAgICAgICA8L21hc2s+CiAgICA8L2RlZnM+Cjwvc3ZnPg==');"></div>
+  <div class="fixed inset-0 -z-10 block bg-cover bg-center bg-no-repeat dark:hidden" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHZpZXdCb3g9IjAgMCAxNDQwIDU2MCI+CiAgICA8ZyBtYXNrPSJ1cmwoJnF1b3Q7I1N2Z2pzTWFzazEwMDEmcXVvdDspIiBmaWxsPSJub25lIj4KICAgICAgICA8cGF0aCBkPSJNMTUxMiA1NjBMMCA1NjAgTDAgMzQ4LjcxUTQ2LjE1IDMyMi44NiwgNzIgMzY5LjAxUTgzLjY0IDMwOC42NSwgMTQ0IDMyMC4yOVExOTAuOTkgMjQ3LjI4LCAyNjQgMjk0LjI4UTMyMC44MSAyNzkuMDgsIDMzNiAzMzUuODlRMzg5LjQ2IDMxNy4zNSwgNDA4IDM3MC44UTQzNS4wNCAzMjUuODQsIDQ4MCAzNTIuODdRNTEwLjc2IDMxMS42MywgNTUyIDM0Mi4zOVE2MDIuMDEgMzIwLjQsIDYyNCAzNzAuNDFRNjc1LjUgMzAxLjkxLCA3NDQgMzUzLjQxUTc5NC44MyAyODQuMjQsIDg2NCAzMzUuMDdRODc1LjM3IDI3NC40NCwgOTM2IDI4NS44UTEwMDcuNTcgMjM3LjM3LCAxMDU2IDMwOC45M1ExMTMyLjA5IDI2NS4wMiwgMTE3NiAzNDEuMTFRMTIxOS41IDMxMi42MSwgMTI0OCAzNTYuMTFRMTI3MC43MyAyNTguODQsIDEzNjggMjgxLjU2UTE0MDkuNDkgMjUxLjA2LCAxNDQwIDI5Mi41NVExNDg4LjM4IDI2OC45MywgMTUxMiAzMTcuMzF6IiBmaWxsPSIjMTgyZjVkIj48L3BhdGg+CiAgICAgICAgPHBhdGggZD0iTTE1NjAgNTYwTDAgNTYwIEwwIDQwOC4wMlE3Ny45OCAzNjYsIDEyMCA0NDMuOTdRMTMyLjMxIDM4NC4yOCwgMTkyIDM5Ni41OVEyMjEuMDUgMzUzLjY0LCAyNjQgMzgyLjY5UTMyMy41IDM3MC4xOSwgMzM2IDQyOS43UTM1Ni42OCAzNzguMzgsIDQwOCAzOTkuMDVRNDkwLjc2IDM2MS44MSwgNTI4IDQ0NC41N1E1NTQuMTcgMzUwLjc0LCA2NDggMzc2LjlRNjc4LjYyIDMzNS41MiwgNzIwIDM2Ni4xNFE4MDUuNjIgMzMxLjc2LCA4NDAgNDE3LjM4UTg4NC45MiAzNDIuMywgOTYwIDM4Ny4yMlE5NzguODMgMzM0LjA1LCAxMDMyIDM1Mi44OFExMDc3LjQ0IDMyNi4zMiwgMTEwNCAzNzEuNzZRMTE3Ny41MSAzNzMuMjcsIDExNzYgNDQ2Ljc4UTExNjMuODEgMzYyLjU4LCAxMjQ4IDM1MC4zOVExMzE3LjgyIDM0OC4yMSwgMTMyMCA0MTguMDNRMTM1OC43OCAzMzYuOCwgMTQ0MCAzNzUuNThRMTQ5MS4wOSAzMDYuNjcsIDE1NjAgMzU3Ljc2eiIgZmlsbD0iIzI1NDY3ZCI+PC9wYXRoPgogICAgICAgIDxwYXRoIGQ9Ik0xNTEyIDU2MEwwIDU2MCBMMCA0OTYuNjRRNTcuMDMgNDMzLjY3LCAxMjAgNDkwLjdRMTU1LjE1IDQwNS44NSwgMjQwIDQ0MC45OVEyODguNSA0MTcuNDksIDMxMiA0NjUuOThRMzY2LjY3IDQwMC42NSwgNDMyIDQ1NS4zMlE0NjAuNDMgNDExLjc1LCA1MDQgNDQwLjE3UTU1OC41MiAzNzQuNjksIDYyNCA0MjkuMjFRNjk4LjI5IDM4My41LCA3NDQgNDU3Ljc5UTgxNC4zNiA0MDguMTUsIDg2NCA0NzguNTJROTEyLjk1IDQ1NS40NywgOTM2IDUwNC40MlExMDAxLjQyIDQ0OS44NCwgMTA1NiA1MTUuMjZRMTA2Ni44IDQ1NC4wNiwgMTEyOCA0NjQuODVRMTE3Ni41NCAzOTMuMzksIDEyNDggNDQxLjkzUTEyNzMuNzMgMzk1LjY2LCAxMzIwIDQyMS4zOVExMzc2Ljg1IDQwNi4yNCwgMTM5MiA0NjMuMDlRMTQ2NC42MyA0MTUuNzMsIDE1MTIgNDg4LjM2eiIgZmlsbD0iIzM1NmNiMSI+PC9wYXRoPgogICAgICAgIDxwYXRoIGQ9Ik0xNTM2IDU2MEwwIDU2MCBMMCA1ODYuNzhRMTguMTYgNTMyLjk0LCA3MiA1NTEuMVExMTQuOTkgNDc0LjA5LCAxOTIgNTE3LjA4UTIxNy4zNCA0NzAuNDMsIDI2NCA0OTUuNzdRMzIxLjExIDQ4MC44OCwgMzM2IDUzNy45OVEzODguNTkgNTE4LjU4LCA0MDggNTcxLjE3UTQxMS40MyA1MDIuNiwgNDgwIDUwNi4wMlE1MzAuODggNDg0Ljg5LCA1NTIgNTM1Ljc3UTU2Ni44NyA0NzguNjQsIDYyNCA0OTMuNTFRNjk4LjYgNDQ4LjExLCA3NDQgNTIyLjdRODA0LjQgNTExLjExLCA4MTYgNTcxLjUxUTg1OS40NSA0OTQuOTYsIDkzNiA1MzguNDFROTcyLjgyIDQ1NS4yMywgMTA1NiA0OTIuMDRRMTEyNS42NCA0NDEuNjksIDExNzYgNTExLjMzUTEyNjMuNDYgNDc4Ljc5LCAxMjk2IDU2Ni4yNlExMzM2LjI0IDQ4Ni41LCAxNDE2IDUyNi43M1ExNDYxLjEzIDQ1MS44NywgMTUzNiA0OTd6IiBmaWxsPSJ3aGl0ZSI+PC9wYXRoPgogICAgPC9nPgogICAgPGRlZnM+CiAgICAgICAgPG1hc2sgaWQ9IlN2Z2pzTWFzazEwMDEiPgogICAgICAgICAgICA8cmVjdCB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIGZpbGw9IiNmZmZmZmYiPjwvcmVjdD4KICAgICAgICA8L21hc2s+CiAgICA8L2RlZnM+Cjwvc3ZnPg==');"></div>
   <div class="fixed inset-0 -z-10 hidden bg-cover bg-center bg-no-repeat dark:block" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHZpZXdCb3g9IjAgMCAxNDQwIDU2MCI+CiAgICA8ZyBtYXNrPSJ1cmwoJnF1b3Q7I1N2Z2pzTWFzazEwMDAmcXVvdDspIiBmaWxsPSJub25lIj4KICAgICAgICA8cmVjdCB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI1NjAiIHg9IjAiIHk9IjAiIGZpbGw9IiMwZTJhNDciPjwvcmVjdD4KICAgICAgICA8cGF0aCBkPSJNMCwzMzAuMjE1QzgwLjgxMSwzMzcuNDExLDE2Mi44MzcsNDAyLjQ2LDIzNS42NTYsMzY2LjY4OEMzMDcuNzg5LDMzMS4yNTMsMzIxLjUzMiwyMzQuODQ3LDM0OC4zNTMsMTU5LjA4OEMzNzMuMDU3LDg5LjMwOCwzOTAuNzY3LDE4LjQ0LDM4NS4wNzUsLTU1LjM2NUMzNzkuMDk1LC0xMzIuOTEyLDM3MC40MDMsLTIxOC4zNTcsMzE1LjAzMywtMjcyLjk3OEMyNjAuNDQ3LC0zMjYuODI2LDE3Mi4xNjEsLTMxNC4yMzQsOTkuMDkzLC0zMzcuNDc4QzIzLjgzMywtMzYxLjQxOSwtNDIuMzg1LC00MjAuNDM2LC0xMjAuODcsLTQxMS42NDRDLTIwMy44NzQsLTQwMi4zNDYsLTI4OC4yMTcsLTM1OS4xNzEsLTMzMy41NDIsLTI4OS4wMTZDLTM3Ny42NjgsLTIyMC43MTgsLTM0OS4zMTMsLTEzMi4wNzEsLTM1My45NDUsLTUwLjg5Qy0zNTguMTEzLDIyLjE3LC0zODUuNDI0LDk1LjczNywtMzU5LjM5NywxNjQuMTMxQy0zMzIuNjY2LDIzNC4zNzUsLTI3OC4zNywyOTUuNDY0LC0yMTAuMTQ1LDMyNi45OTJDLTE0NS4yMzYsMzU2Ljk4OCwtNzEuMjIzLDMyMy44NzMsMCwzMzAuMjE1IiBmaWxsPSIjMGIyMjM5Ij48L3BhdGg+CiAgICAgICAgPHBhdGggZD0iTTE0NDAgMTE2MS4zNzE5OTk5OTk5OTk4QzE1NTAuNTkyIDExNDguMzExMDAwMDAwMDAwMSAxNjQxLjIyIDEwNzkuMDU5IDE3MzMuOTQ3MDAwMDAwMDAwMSAxMDE3LjM5MTAwMDAwMDAwMDEgMTgyNS4yMjkgOTU2LjY4MyAxOTM0LjcxOCA5MDYuMzQ0IDE5NzYuMTA4IDgwNC44MzIgMjAxNy4xMTcgNzA0LjI1NCAxOTcwLjYxMDk5OTk5OTk5OTkgNTkzLjMzMyAxOTUwLjM2MDAwMDAwMDAwMDEgNDg2LjYyMSAxOTMxLjA0MiAzODQuODI0IDE5MTkuNzY0MDAwMDAwMDAwMSAyODAuNjI2IDE4NjAuNSAxOTUuNjM0MDAwMDAwMDAwMDEgMTc5Ny4yOTMwMDAwMDAwMDAxIDEwNC45ODggMTcxMC40MzUgMzAuNTYyMDAwMDAwMDAwMDEyIDE2MDYuMzg5OTk5OTk5OTk5OS02LjY3MjAwMDAwMDAwMDAyNTUgMTQ5OC45NC00NS4xMjMwMDAwMDAwMDAwNSAxMzc3LjA0MS01Ny42NjMwMDAwMDAwMDAwMSAxMjcxLjA3Ny0xNS4yOTgwMDAwMDAwMDAwMDIgMTE2OC41MDkgMjUuNzA4OTk5OTk5OTk5OTk0NiAxMTI3LjM5MyAxNDQuMTQ5OTk5OTk5OTk5OTggMTA0NS4wMzIgMjE3Ljc1OTAwMDAwMDAwMDAxIDk0Ni4zMjEgMzA1Ljk4MSA3NjguNTI3IDMzMC4wNzcgNzM5Ljk5MyA0NTkuMzU0IDcxMS45MTkgNTg2LjU0OCA4NTIuNjcgNjg1LjU1OCA5MTYuNzQ5IDc5OC45NjEgOTc0LjQ3Mzk5OTk5OTk5OTkgOTAxLjExNzk5OTk5OTk5OTkgMTAwMS4zMDggMTAyNS43MTEgMTA5Ny43NjkgMTA5Mi41MjEgMTE5NS40MDUgMTE2MC4xNDUgMTMyMi4wNTIgMTE3NS4zMDEgMTQ0MCAxMTYxLjM3MTk5OTk5OTk5OTgiIGZpbGw9IiMxMTMyNTUiPjwvcGF0aD4KICAgIDwvZz4KICAgIDxkZWZzPgogICAgICAgIDxtYXNrIGlkPSJTdmdqc01hc2sxMDAwIj4KICAgICAgICAgICAgPHJlY3Qgd2lkdGg9IjE0NDAiIGhlaWdodD0iNTYwIiBmaWxsPSIjZmZmZmZmIj48L3JlY3Q+CiAgICAgICAgPC9tYXNrPgogICAgPC9kZWZzPgo8L3N2Zz4=');"></div>
   <header class="sticky top-0 z-40 bg-white dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -348,6 +348,7 @@ export function dashboardPage(
   entries: StepEntry[],
   userStats: { total_steps: number; days_logged: number },
   teamStats: Array<{ team_name: string; total_steps: number }>,
+  canSwitchEvents: boolean,
   options: { flash?: string; error?: string } = {}
 ): string {
   const isActive = event.status === 'active';
@@ -513,10 +514,10 @@ export function dashboardPage(
            </p>
            <p class="text-slate-600 dark:text-slate-400 mt-1">Team: <span class="font-medium text-slate-900 dark:text-slate-100">${escapeHtml(teamName ?? 'Unassigned')}</span></p>
          </div>
-         <div class="flex items-center gap-4">
-           <a href="/dashboard" class="text-sm font-medium text-teal-600 hover:text-teal-800">Switch event</a>
-           ${leaveButton}
-         </div>
+          <div class="flex items-center gap-4">
+            ${canSwitchEvents ? `<a href="/dashboard" class="text-sm font-medium text-teal-600 hover:text-teal-800">Switch event</a>` : ''}
+            ${leaveButton}
+          </div>
        </div>
 
        ${waitingMessage}
@@ -639,7 +640,9 @@ export function adminEventDetailPage(
   teams: Team[],
   participants: ParticipantRow[],
   usersNotInEvent: User[],
-  report: LeaderboardRow[],
+  memberTotals: Array<{ user_id: number; display_name: string; team_id: number; team_name: string; total_steps: number }>,
+  teamTotals: Array<{ team_name: string; total_steps: number }>,
+  dailyTotals: Array<{ entry_date: string; total_steps: number }>,
   stats: { total_steps: number; participant_count: number; entry_count: number },
   pendingCount: number,
   teamMembers: Map<number, Array<{ id: number; user_email: string; user_display_name: string | null }>>,
@@ -740,9 +743,9 @@ export function adminEventDetailPage(
     .map(
       (t) => {
         const members = teamMembers.get(t.id) ?? [];
-        return `<li class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0 text-sm text-slate-700 dark:text-slate-300">
+        return `<li class="flex items-center justify-between rounded-xl bg-white dark:bg-slate-800 p-4 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40 text-sm text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow">
           <div class="flex items-center gap-2">
-            <span class="font-medium text-slate-900 dark:text-slate-100">${escapeHtml(t.name)}</span>
+            <span class="font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(t.name)}</span>
             <span class="text-xs text-slate-500 dark:text-slate-400">(${members.length})</span>
           </div>
           <div class="flex items-center gap-3">
@@ -789,16 +792,48 @@ export function adminEventDetailPage(
     )
     .join('');
 
-  const reportRows = report
+  const teamTotalById = new Map(teams.map((t) => [t.name, t.id]));
+
+  const teamLeaderboardRows = [...teamTotals]
+    .sort((a, b) => b.total_steps - a.total_steps)
     .map(
-      (r, i) => `<tr class="border-b border-slate-100 last:border-0">
-        <td class="py-3 pr-4 text-sm text-slate-600 dark:text-slate-400">${i + 1}</td>
-        <td class="py-3 pr-4 text-sm font-medium text-slate-900 dark:text-slate-100">${escapeHtml(r.display_name ?? '-')}</td>
-        <td class="py-3 pr-4 text-sm text-slate-600 dark:text-slate-400">${escapeHtml(r.team_name)}</td>
-        <td class="py-3 pr-4 text-sm text-slate-900 dark:text-slate-100 text-right">${escapeHtml(r.total_steps.toLocaleString())}</td>
-      </tr>`
+      (r, i) => {
+        const teamId = teamTotalById.get(r.team_name);
+        const cells = `<td class="py-3 pr-4 text-sm text-slate-600 dark:text-slate-400">${i + 1}</td>
+          <td class="py-3 pr-4 text-sm font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(r.team_name)}</td>
+          <td class="py-3 pr-4 text-sm text-slate-900 dark:text-slate-100 text-right">${escapeHtml(r.total_steps.toLocaleString())}</td>`;
+        if (teamId == null) {
+          return `<tr class="border-b border-slate-100 dark:border-slate-700 last:border-0">${cells}</tr>`;
+        }
+        return `<tr onclick="document.getElementById('team-stats-drawer-${teamId}').showModal()" class="cursor-pointer border-b border-slate-100 dark:border-slate-700 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">${cells}</tr>${teamStatsDrawer(teamId, r.team_name)}`;
+      }
     )
     .join('');
+
+  function teamStatsDrawer(teamId: number, teamName: string): string {
+    const members = memberTotals
+      .filter((m) => m.team_id === teamId)
+      .sort((a, b) => b.total_steps - a.total_steps);
+    const memberRows = members
+      .map(
+        (m) => `<li class="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
+          <span class="text-sm font-medium text-slate-900 dark:text-slate-100">${escapeHtml(m.display_name ?? '-')}</span>
+          <span class="text-sm text-slate-600 dark:text-slate-400">${escapeHtml(m.total_steps.toLocaleString())} steps</span>
+        </li>`
+      )
+      .join('');
+    return `<dialog id="team-stats-drawer-${teamId}" class="fixed inset-y-0 right-0 m-0 ml-auto h-full max-h-full w-full max-w-sm rounded-l-2xl p-0 shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-700/40 backdrop:bg-slate-900/50 open:animate-fade">
+      <div class="flex h-full flex-col bg-white dark:bg-slate-900 rounded-l-2xl">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 p-4">
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(teamName)} members</h3>
+          <button type="button" onclick="document.getElementById('team-stats-drawer-${teamId}').close()" class="text-slate-400 hover:text-slate-600 dark:text-slate-400 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+          ${members.length > 0 ? `<ul>${memberRows}</ul>` : '<p class="text-sm text-slate-500 dark:text-slate-400">No members assigned.</p>'}
+        </div>
+      </div>
+    </dialog>`;
+  }
 
   const dateRange = [event.starts_at, event.ends_at]
     .filter(Boolean)
@@ -869,37 +904,121 @@ export function adminEventDetailPage(
     : '';
 
 
+  const chartColors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'];
+  const teamChartData = teamTotals.map((t) => ({ team_id: teamTotalById.get(t.team_name) ?? 0, team_name: t.team_name, total_steps: t.total_steps }));
+
   const reportsSection = isActive
     ? `<section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
          <h2 class="text-lg font-semibold mb-4">Reports</h2>
-         <div class="grid gap-4 sm:grid-cols-3 mb-6">
-           <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200">
-             <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.total_steps.toLocaleString())}</span>
-             <span class="text-sm text-slate-600 dark:text-slate-400">Total steps</span>
+         <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
+           <div class="space-y-4">
+             <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
+               <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.total_steps.toLocaleString())}</span>
+               <span class="text-sm text-slate-600 dark:text-slate-400">Total steps</span>
+             </div>
+             <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
+               <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.participant_count.toLocaleString())}</span>
+               <span class="text-sm text-slate-600 dark:text-slate-400">Participants</span>
+             </div>
+             <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
+               <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.entry_count.toLocaleString())}</span>
+               <span class="text-sm text-slate-600 dark:text-slate-400">Entries</span>
+             </div>
+             <div>
+               <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Team leaderboard</h3>
+               <div class="overflow-x-auto">
+                 <table class="w-full text-left">
+                   <thead>
+                     <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                       <th class="pb-2 pr-2">#</th>
+                       <th class="pb-2 pr-2">Team</th>
+                       <th class="pb-2 pr-2 text-right">Steps</th>
+                     </tr>
+                   </thead>
+                   <tbody>${teamLeaderboardRows || '<tr><td colspan="3" class="py-6 text-center text-sm text-slate-500">No entries yet.</td></tr>'}</tbody>
+                 </table>
+               </div>
+             </div>
            </div>
-           <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200">
-             <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.participant_count.toLocaleString())}</span>
-             <span class="text-sm text-slate-600 dark:text-slate-400">Participants</span>
-           </div>
-           <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-4 ring-1 ring-slate-200">
-             <span class="block text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(stats.entry_count.toLocaleString())}</span>
-             <span class="text-sm text-slate-600 dark:text-slate-400">Entries</span>
+           <div class="space-y-6">
+             <div>
+               <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Steps by team</h3>
+               <div class="w-full max-w-md mx-auto">
+                 <canvas id="teamPieChart"></canvas>
+               </div>
+             </div>
+             <div>
+               <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Daily steps</h3>
+               <div class="w-full">
+                 <canvas id="dailyLineChart"></canvas>
+               </div>
+             </div>
            </div>
          </div>
-         <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Leaderboard</h3>
-         <div class="overflow-x-auto">
-           <table class="w-full text-left">
-             <thead>
-               <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                 <th class="pb-3 pr-4">#</th>
-                 <th class="pb-3 pr-4">User</th>
-                 <th class="pb-3 pr-4">Team</th>
-                 <th class="pb-3 pr-4 text-right">Steps</th>
-               </tr>
-             </thead>
-             <tbody>${reportRows || '<tr><td colspan="4" class="py-6 text-center text-sm text-slate-500">No entries yet.</td></tr>'}</tbody>
-           </table>
-         </div>
+          <script>
+            (function () {
+              const teamChartData = ${JSON.stringify(teamChartData).replace(/</g, '\\u003c')};
+              const dailyTotals = ${JSON.stringify(dailyTotals).replace(/</g, '\\u003c')};
+              const colors = ${JSON.stringify(chartColors).replace(/</g, '\\u003c')};
+
+              const pieCtx = document.getElementById('teamPieChart').getContext('2d');
+              new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                  labels: teamChartData.map(t => t.team_name),
+                  datasets: [{
+                    data: teamChartData.map(t => t.total_steps),
+                    backgroundColor: colors,
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  onClick: (e, activeElements) => {
+                    if (activeElements.length > 0) {
+                      const index = activeElements[0].index;
+                      const teamId = teamChartData[index].team_id;
+                      if (teamId) {
+                        document.getElementById('team-stats-drawer-' + teamId).showModal();
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                  }
+                }
+              });
+
+             const lineCtx = document.getElementById('dailyLineChart').getContext('2d');
+             new Chart(lineCtx, {
+               type: 'line',
+               data: {
+                 labels: dailyTotals.map(d => d.entry_date),
+                 datasets: [{
+                   label: 'Total steps',
+                   data: dailyTotals.map(d => d.total_steps),
+                   borderColor: '#0d9488',
+                   backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                   fill: true,
+                   tension: 0.3,
+                   pointRadius: 3,
+                   pointHoverRadius: 5
+                 }]
+               },
+               options: {
+                 responsive: true,
+                 scales: {
+                   x: { ticks: { maxTicksLimit: 10 } },
+                   y: { beginAtZero: true }
+                 },
+                 plugins: {
+                   legend: { display: false }
+                 }
+               }
+             });
+           })();
+         </script>
        </section>`
     : '';
 
@@ -955,42 +1074,42 @@ export function adminEventDetailPage(
          </dialog>
        </div>
 
-       ${reportsSection}
+        ${reportsSection}
 
-         <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
-           <h2 class="text-lg font-semibold mb-4">Teams</h2>
-           ${generateTeamsControl}
-           ${teamRows ? `<ul class="mb-4">${teamRows}</ul>` : '<p class="text-sm text-slate-500 mb-4">No teams yet.</p>'}
-           ${isAccepting
-            ? `<form method="post" action="/admin/events/${event.id}/teams" class="flex items-end gap-3">
+        ${isAccepting
+          ? `<section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
+               <h2 class="text-lg font-semibold mb-4">Teams</h2>
+               ${generateTeamsControl}
+               ${teamRows ? `<ul class="mb-4 space-y-3">${teamRows}</ul>` : '<p class="text-sm text-slate-500 mb-4">No teams yet.</p>'}
+               <form method="post" action="/admin/events/${event.id}/teams" class="flex items-end gap-3">
                  <div class="flex-1">
                    <label for="teamName" class="${labelClass()}">New team name</label>
                    <input id="teamName" name="name" required maxlength="100" class="${inputClass()}" placeholder="e.g. Marketing">
                  </div>
                  <button type="submit" class="rounded-lg bg-teal-600 px-4 py-2.5 text-white font-medium hover:bg-teal-700">Create team</button>
-               </form>`
-            : ''}
-        </section>
+               </form>
+             </section>
 
-       <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
-         <h2 class="text-lg font-semibold mb-4">Participants</h2>
-         <div class="overflow-x-auto mb-4">
-           <table class="w-full text-left">
-               <thead>
-                 <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    <th class="pb-3 pr-4">Display name</th>
-                   <th class="pb-3 pr-4">Email</th>
-                   <th class="pb-3 pr-4">Team</th>
-                   <th class="pb-3 pr-4">Status</th>
-                   ${isAccepting ? '<th class="pb-3 text-right">Actions</th>' : ''}
-                 </tr>
-               </thead>
-               <tbody>${participantRows || `<tr><td colspan="${isAccepting ? 5 : 4}" class="py-6 text-center text-sm text-slate-500">No participants yet.</td></tr>`}</tbody>
-           </table>
-         </div>
-         ${addParticipantForm}
-        </section>
-       </div>`,
+             <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
+               <h2 class="text-lg font-semibold mb-4">Participants</h2>
+               <div class="overflow-x-auto mb-4">
+                 <table class="w-full text-left">
+                   <thead>
+                     <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                       <th class="pb-3 pr-4">Display name</th>
+                       <th class="pb-3 pr-4">Email</th>
+                       <th class="pb-3 pr-4">Team</th>
+                       <th class="pb-3 pr-4">Status</th>
+                       <th class="pb-3 text-right">Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>${participantRows || '<tr><td colspan="5" class="py-6 text-center text-sm text-slate-500">No participants yet.</td></tr>'}</tbody>
+                 </table>
+               </div>
+               ${addParticipantForm}
+             </section>`
+          : ''}
+        </div>`,
     { user, ...options }
   );
 }
@@ -1046,8 +1165,11 @@ export function adminUsersPage(
         <td class="py-3 pr-4 text-sm text-slate-600 dark:text-slate-400">${escapeHtml(u.organization_name)}</td>
         <td class="py-3 pr-4 text-sm capitalize text-slate-600 dark:text-slate-400">${escapeHtml(u.role)}</td>
         <td class="py-3 text-right">
-          <button type="button" onclick="document.getElementById('edit-user-${u.id}').showModal()" class="rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">Edit</button>
-          ${editUserDialog(u)}
+          <div class="flex items-center justify-end gap-2">
+            <a href="/admin/users/${u.id}" class="rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">View</a>
+            <button type="button" onclick="document.getElementById('edit-user-${u.id}').showModal()" class="rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">Edit</button>
+            ${editUserDialog(u)}
+          </div>
         </td>
       </tr>`
     )
@@ -1073,6 +1195,100 @@ export function adminUsersPage(
        </div>`
     ),
     { user, ...options }
+  );
+}
+
+export function adminUserDetailPage(
+  adminUser: SessionUser,
+  user: User,
+  organization: Organization | null,
+  eventData: Array<{
+    event: Event & { team_id: number | null; team_name: string | null; participant_status: 'joined' | 'assigned_team' };
+    entries: StepEntry[];
+    summary: { total_steps: number; days_logged: number };
+  }>,
+  options: { flash?: string; error?: string } = {}
+): string {
+  const eventAccordions = eventData
+    .map(({ event, entries, summary }) => {
+      const dateRange = [event.starts_at, event.ends_at]
+        .filter(Boolean)
+        .map((d) => new Date(d as string).toLocaleDateString())
+        .join(' – ');
+      const entryRows = entries
+        .map(
+          (e) => {
+            const thumb = e.image_key
+              ? `<a href="/uploads/${escapeHtml(e.image_key)}" target="_blank" class="inline-block"><img src="/uploads/${escapeHtml(e.image_key)}" alt="Proof" class="h-10 w-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 hover:ring-2 hover:ring-teal-500"></a>`
+              : '<span class="text-slate-400">—</span>';
+            return `<tr class="border-b border-slate-100 dark:border-slate-700 last:border-0">
+              <td class="py-2 pr-4 text-sm text-slate-700 dark:text-slate-300">${escapeHtml(e.entry_date)}</td>
+              <td class="py-2 pr-4 text-sm font-medium text-slate-900 dark:text-slate-100">${escapeHtml(e.steps.toLocaleString())}</td>
+              <td class="py-2 pr-4">${thumb}</td>
+            </tr>`;
+          }
+        )
+        .join('');
+      return `<details class="group rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-900/5 dark:ring-slate-700/40 overflow-hidden">
+        <summary class="flex cursor-pointer items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+            <span class="font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(event.name)}</span>
+            <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              ${statusBadge(event.status)}
+              ${event.team_name ? `<span>· ${escapeHtml(event.team_name)}</span>` : ''}
+              ${dateRange ? `<span>· ${escapeHtml(dateRange)}</span>` : ''}
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-sm">
+            <span class="text-slate-600 dark:text-slate-400"><span class="font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(summary.total_steps.toLocaleString())}</span> steps</span>
+            <span class="text-slate-600 dark:text-slate-400"><span class="font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(String(entries.length))}</span> entries</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
+        </summary>
+        <div class="p-4 pt-0 border-t border-slate-100 dark:border-slate-700">
+          ${entries.length > 0
+            ? `<div class="overflow-x-auto mt-4">
+                 <table class="w-full text-left">
+                   <thead>
+                     <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                       <th class="pb-2 pr-4">Date</th>
+                       <th class="pb-2 pr-4">Steps</th>
+                       <th class="pb-2 pr-4">Image</th>
+                     </tr>
+                   </thead>
+                   <tbody>${entryRows}</tbody>
+                 </table>
+               </div>`
+            : '<p class="mt-4 text-sm text-slate-500 dark:text-slate-400">No entries for this event.</p>'}
+        </div>
+      </details>`;
+    })
+    .join('');
+
+  return layout(
+    `Admin — ${user.display_name ?? user.email}`,
+    `<div class="space-y-6">
+       <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+         <a href="/admin/users" class="hover:text-teal-600">← Users</a>
+       </div>
+
+       <section class="rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-700/40">
+         <h1 class="text-3xl font-bold tracking-tight mb-2">${escapeHtml(user.display_name ?? '-')}</h1>
+         <div class="space-y-1 text-sm text-slate-600 dark:text-slate-400">
+           <p><span class="font-medium text-slate-900 dark:text-slate-100">Email:</span> ${escapeHtml(user.email)}</p>
+           <p><span class="font-medium text-slate-900 dark:text-slate-100">Organization:</span> ${escapeHtml(organization?.name ?? '-')}</p>
+           <p><span class="font-medium text-slate-900 dark:text-slate-100">Role:</span> <span class="capitalize">${escapeHtml(user.role)}</span></p>
+         </div>
+       </section>
+
+       <section class="space-y-3">
+         <h2 class="text-lg font-semibold">Events & entries</h2>
+         ${eventAccordions || '<p class="text-sm text-slate-500 dark:text-slate-400">This user is not registered in any events.</p>'}
+       </section>
+     </div>`,
+    { user: adminUser, ...options }
   );
 }
 

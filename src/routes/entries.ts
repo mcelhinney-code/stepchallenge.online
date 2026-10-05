@@ -183,10 +183,12 @@ async function renderDashboard(
 ) {
   const eventId = event.id;
   const teamName = participant?.team_name ?? null;
+  const userEvents = await getUserEvents(c.env.DB, user.userId);
+  const canSwitchEvents = userEvents.length > 1;
 
   if (event.status !== 'active') {
     return c.html(
-      dashboardPage(user, event, teamName, [], { total_steps: 0, days_logged: 0 }, [], options)
+      dashboardPage(user, event, teamName, [], { total_steps: 0, days_logged: 0 }, [], canSwitchEvents, options)
     );
   }
 
@@ -196,7 +198,7 @@ async function renderDashboard(
     getTeamStepTotals(c.env.DB, eventId),
   ]);
   return c.html(
-    dashboardPage(user, event, teamName, recentEntries, userStats, teamStats, options)
+    dashboardPage(user, event, teamName, recentEntries, userStats, teamStats, canSwitchEvents, options)
   );
 }
 
@@ -247,21 +249,14 @@ entries.post('/entries', async (c) => {
     imageKey = await storeUserImage(c.env.IMAGES, user.userId, eventId, entryDate, imageCheck.file);
   }
 
-  try {
-    await createStepEntry(c.env.DB, {
-      eventId,
-      userId: user.userId,
-      teamId: participant.team_id,
-      entryDate,
-      steps: Number(steps),
-      imageKey,
-    });
-  } catch (err) {
-    // Likely a unique constraint violation for this event/user/date
-    return renderDashboard(c, user, event, participant, {
-      error: 'You have already logged steps for this date in this event.',
-    });
-  }
+  await createStepEntry(c.env.DB, {
+    eventId,
+    userId: user.userId,
+    teamId: participant.team_id,
+    entryDate,
+    steps: Number(steps),
+    imageKey,
+  });
 
   return renderDashboard(c, user, event, participant, { flash: 'Entry saved.' });
 });

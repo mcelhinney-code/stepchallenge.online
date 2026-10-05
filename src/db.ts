@@ -65,6 +65,13 @@ export async function getOrganizationByDomain(
     .first<Organization>();
 }
 
+export async function getOrganizationById(
+  db: D1Database,
+  id: number
+): Promise<Organization | null> {
+  return await db.prepare('SELECT * FROM organizations WHERE id = ?').bind(id).first<Organization>();
+}
+
 // Users
 
 export async function getUserByEmail(db: D1Database, email: string): Promise<User | null> {
@@ -367,7 +374,10 @@ export async function createStepEntry(
 ): Promise<number> {
   const result = await db
     .prepare(
-      'INSERT INTO step_entries (event_id, user_id, team_id, entry_date, steps, image_key) VALUES (?, ?, ?, ?, ?, ?)'
+      `INSERT INTO step_entries (event_id, user_id, team_id, entry_date, steps, image_key)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(event_id, user_id, entry_date)
+       DO UPDATE SET steps = excluded.steps, image_key = COALESCE(excluded.image_key, step_entries.image_key)`
     )
     .bind(input.eventId, input.userId, input.teamId, input.entryDate, input.steps, input.imageKey)
     .run();
@@ -476,6 +486,48 @@ export async function getEventStats(
     .bind(eventId, eventId, eventId)
     .first<{ total_steps: number; participant_count: number; entry_count: number }>();
   return result ?? { total_steps: 0, participant_count: 0, entry_count: 0 };
+}
+
+export async function getEventMemberTotals(
+  db: D1Database,
+  eventId: number
+): Promise<Array<{ user_id: number; display_name: string; team_id: number; team_name: string; total_steps: number }>> {
+  const { results } = await db
+    .prepare(
+      `SELECT
+         users.id as user_id,
+         users.display_name as display_name,
+         teams.id as team_id,
+         teams.name as team_name,
+         COALESCE(SUM(step_entries.steps), 0) as total_steps
+       FROM event_participants
+       JOIN users ON event_participants.user_id = users.id
+       JOIN teams ON event_participants.team_id = teams.id
+       LEFT JOIN step_entries ON step_entries.event_id = event_participants.event_id AND step_entries.user_id = users.id
+       WHERE event_participants.event_id = ?
+       GROUP BY users.id, teams.id
+       ORDER BY total_steps DESC`
+    )
+    .bind(eventId)
+    .all<{ user_id: number; display_name: string; team_id: number; team_name: string; total_steps: number }>();
+  return results ?? [];
+}
+
+export async function getDailyStepTotals(
+  db: D1Database,
+  eventId: number
+): Promise<Array<{ entry_date: string; total_steps: number }>> {
+  const { results } = await db
+    .prepare(
+      `SELECT entry_date, COALESCE(SUM(steps), 0) as total_steps
+       FROM step_entries
+       WHERE event_id = ?
+       GROUP BY entry_date
+       ORDER BY entry_date ASC`
+    )
+    .bind(eventId)
+    .all<{ entry_date: string; total_steps: number }>();
+  return results ?? [];
 }
 
 export async function getStepEntryImageKeysByEvent(
