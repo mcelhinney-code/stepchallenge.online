@@ -132,3 +132,54 @@ export async function updateStepEntry(
     .bind(input.entryDate, input.steps, input.imageKey, id)
     .run();
 }
+
+export async function updateUserPassword(
+  db: D1Database,
+  id: number,
+  passwordHash: string,
+  passwordSalt: string
+): Promise<void> {
+  await db.prepare('UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?').bind(passwordHash, passwordSalt, id).run();
+}
+
+export async function getAllUsers(db: D1Database): Promise<Array<User & { team_name: string }>> {
+  const { results } = await db
+    .prepare(
+      `SELECT users.*, teams.name as team_name
+       FROM users
+       JOIN teams ON users.team_id = teams.id
+       ORDER BY users.created_at DESC`
+    )
+    .all<User & { team_name: string }>();
+  return results ?? [];
+}
+
+export async function getUserStepSummary(
+  db: D1Database,
+  userId: number
+): Promise<{ total_steps: number; days_logged: number }> {
+  const result = await db
+    .prepare(
+      `SELECT COALESCE(SUM(steps), 0) as total_steps, COUNT(*) as days_logged
+       FROM step_entries
+       WHERE user_id = ?`
+    )
+    .bind(userId)
+    .first<{ total_steps: number; days_logged: number }>();
+  return result ?? { total_steps: 0, days_logged: 0 };
+}
+
+export async function getTeamStepTotals(
+  db: D1Database
+): Promise<Array<{ team_name: string; total_steps: number; color?: string }>> {
+  const { results } = await db
+    .prepare(
+      `SELECT teams.name as team_name, COALESCE(SUM(step_entries.steps), 0) as total_steps
+       FROM teams
+       LEFT JOIN step_entries ON teams.id = step_entries.team_id
+       GROUP BY teams.id, teams.name
+       ORDER BY teams.name`
+    )
+    .all<{ team_name: string; total_steps: number }>();
+  return results ?? [];
+}

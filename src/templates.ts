@@ -29,6 +29,7 @@ function layout(
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -75,7 +76,7 @@ function layout(
 }
 
 function inputClass(): string {
-  return 'block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm';
+  return 'block w-full min-h-[44px] rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 sm:text-sm';
 }
 
 function labelClass(): string {
@@ -216,10 +217,16 @@ export function dashboardPage(
   user: SessionUser,
   teamName: string,
   entries: StepEntry[],
+  userStats: { total_steps: number; days_logged: number },
+  teamStats: Array<{ team_name: string; total_steps: number }>,
   options: { flash?: string; error?: string } = {}
 ): string {
   const today = new Date().toISOString().split('T')[0];
   const greeting = user.displayName ? `Hi, ${escapeHtml(user.displayName)}` : 'Dashboard';
+  const average = userStats.days_logged > 0 ? Math.round(userStats.total_steps / userStats.days_logged) : 0;
+  const teamStatsJson = JSON.stringify(teamStats);
+  const userStatsJson = JSON.stringify({ total: userStats.total_steps, average });
+
   const entriesRows = entries
     .map(
       (e) => {
@@ -237,6 +244,9 @@ export function dashboardPage(
       }
     )
     .join('');
+
+  const chartColors = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
+
   return layout(
     'Dashboard',
     `<div class="space-y-8">
@@ -268,6 +278,31 @@ export function dashboardPage(
        </section>
 
        <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+         <h2 class="text-lg font-semibold mb-4">Stats</h2>
+         <div class="grid gap-6 md:grid-cols-2">
+           <div class="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200">
+             <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-4">Your stats</h3>
+             <div class="grid grid-cols-2 gap-4">
+               <div>
+                 <span class="block text-3xl font-bold text-slate-900">${escapeHtml(userStats.total_steps.toLocaleString())}</span>
+                 <span class="text-sm text-slate-600">Total steps</span>
+               </div>
+               <div>
+                 <span class="block text-3xl font-bold text-slate-900">${escapeHtml(average.toLocaleString())}</span>
+                 <span class="text-sm text-slate-600">Avg / day</span>
+               </div>
+             </div>
+           </div>
+           <div class="rounded-xl bg-slate-50 p-5 ring-1 ring-slate-200 flex flex-col items-center">
+             <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2 w-full">Steps by team</h3>
+             <div class="w-full max-w-xs">
+               <canvas id="teamChart"></canvas>
+             </div>
+           </div>
+         </div>
+       </section>
+
+       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
          <h2 class="text-lg font-semibold mb-4">Your recent entries</h2>
          <div class="overflow-x-auto">
            <table class="w-full text-left">
@@ -283,6 +318,32 @@ export function dashboardPage(
            </table>
          </div>
        </section>
+
+       <script type="application/json" id="team-stats-data">${escapeHtml(teamStatsJson)}</script>
+       <script>
+         (function() {
+           const data = JSON.parse(document.getElementById('team-stats-data').textContent);
+           const ctx = document.getElementById('teamChart').getContext('2d');
+           const colors = ${JSON.stringify(chartColors)};
+           new Chart(ctx, {
+             type: 'pie',
+             data: {
+               labels: data.map(d => d.team_name),
+               datasets: [{
+                 data: data.map(d => d.total_steps),
+                 backgroundColor: data.map((_, i) => colors[i % colors.length]),
+                 borderWidth: 0
+               }]
+             },
+             options: {
+               responsive: true,
+               plugins: {
+                 legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+               }
+             }
+           });
+         })();
+       </script>
      </div>`,
     { user, ...options }
   );
@@ -314,10 +375,11 @@ export function profilePage(
 
 export function adminPage(
   pendingUsers: Array<User & { team_name: string }>,
+  allUsers: Array<User & { team_name: string }>,
   secret: string,
   options: { flash?: string; error?: string } = {}
 ): string {
-  const rows = pendingUsers
+  const pendingRows = pendingUsers
     .map(
       (u) => `<tr class="border-b border-slate-100 last:border-0">
         <td class="py-3 pr-4 text-sm font-medium text-slate-900">${escapeHtml(u.display_name ?? '-')}</td>
@@ -331,23 +393,61 @@ export function adminPage(
       </tr>`
     )
     .join('');
+
+  const userRows = allUsers
+    .map(
+      (u) => `<tr class="border-b border-slate-100 last:border-0">
+        <td class="py-3 pr-4 text-sm font-medium text-slate-900">${escapeHtml(u.display_name ?? '-')}</td>
+        <td class="py-3 pr-4 text-sm text-slate-600">${escapeHtml(u.email)}</td>
+        <td class="py-3 pr-4 text-sm text-slate-600">${escapeHtml(u.team_name)}</td>
+        <td class="py-3 pr-4 text-sm capitalize text-slate-600">${escapeHtml(u.status)}</td>
+        <td class="py-3 text-right">
+          <form method="post" action="/admin/users/${u.id}/reset-password?secret=${encodeURIComponent(secret)}" class="flex items-center justify-end gap-2">
+            <input type="password" name="newPassword" required minlength="8" placeholder="New password" class="${inputClass()} w-40">
+            <button type="submit" class="rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600 whitespace-nowrap">Reset</button>
+          </form>
+        </td>
+      </tr>`
+    )
+    .join('');
+
   return layout(
     'Admin',
-    `<div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
-       <h1 class="text-2xl font-bold tracking-tight mb-4">Pending registrations</h1>
-       <div class="overflow-x-auto">
-         <table class="w-full text-left">
-           <thead>
-             <tr class="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
-               <th class="pb-3 pr-4">Display name</th>
-               <th class="pb-3 pr-4">Email</th>
-               <th class="pb-3 pr-4">Team</th>
-               <th class="pb-3 text-right">Action</th>
-             </tr>
-           </thead>
-           <tbody>${rows || '<tr><td colspan="4" class="py-6 text-center text-sm text-slate-500">No pending users.</td></tr>'}</tbody>
-         </table>
-       </div>
+    `<div class="space-y-8">
+       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+         <h1 class="text-2xl font-bold tracking-tight mb-4">Pending registrations</h1>
+         <div class="overflow-x-auto">
+           <table class="w-full text-left">
+             <thead>
+               <tr class="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                 <th class="pb-3 pr-4">Display name</th>
+                 <th class="pb-3 pr-4">Email</th>
+                 <th class="pb-3 pr-4">Team</th>
+                 <th class="pb-3 text-right">Action</th>
+               </tr>
+             </thead>
+             <tbody>${pendingRows || '<tr><td colspan="4" class="py-6 text-center text-sm text-slate-500">No pending users.</td></tr>'}</tbody>
+           </table>
+         </div>
+       </section>
+
+       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+         <h2 class="text-xl font-bold tracking-tight mb-4">All users</h2>
+         <div class="overflow-x-auto">
+           <table class="w-full text-left">
+             <thead>
+               <tr class="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                 <th class="pb-3 pr-4">Display name</th>
+                 <th class="pb-3 pr-4">Email</th>
+                 <th class="pb-3 pr-4">Team</th>
+                 <th class="pb-3 pr-4">Status</th>
+                 <th class="pb-3 text-right">Reset password</th>
+               </tr>
+             </thead>
+             <tbody>${userRows || '<tr><td colspan="5" class="py-6 text-center text-sm text-slate-500">No users.</td></tr>'}</tbody>
+           </table>
+         </div>
+       </section>
      </div>`,
     options
   );

@@ -1,6 +1,15 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import type { AppEnv } from '../types';
-import { getUserStepEntries, createStepEntry, getTeamById, getStepEntryById, updateStepEntry } from '../db';
+import {
+  getUserStepEntries,
+  createStepEntry,
+  getTeamById,
+  getStepEntryById,
+  updateStepEntry,
+  getUserStepSummary,
+  getTeamStepTotals,
+} from '../db';
 import { isValidDate, isValidSteps } from '../validation';
 import { dashboardPage } from '../templates';
 
@@ -43,13 +52,24 @@ function validateImage(image: unknown): { ok: true; file: File } | { ok: false; 
   return { ok: true, file: image };
 }
 
+async function renderDashboard(
+  c: Context<AppEnv>,
+  user: NonNullable<AppEnv['Variables']['user']>,
+  options: { flash?: string; error?: string } = {}
+) {
+  const [team, recentEntries, userStats, teamStats] = await Promise.all([
+    getTeamById(c.env.DB, user.teamId),
+    getUserStepEntries(c.env.DB, user.userId, 10),
+    getUserStepSummary(c.env.DB, user.userId),
+    getTeamStepTotals(c.env.DB),
+  ]);
+  return c.html(dashboardPage(user, team?.name ?? 'Unknown team', recentEntries, userStats, teamStats, options));
+}
+
 entries.get('/dashboard', async (c) => {
   const user = c.get('user');
   if (!user) return c.redirect('/login');
-
-  const team = await getTeamById(c.env.DB, user.teamId);
-  const recentEntries = await getUserStepEntries(c.env.DB, user.userId, 10);
-  return c.html(dashboardPage(user, team?.name ?? 'Unknown team', recentEntries));
+  return renderDashboard(c, user);
 });
 
 entries.post('/entries', async (c) => {
@@ -64,20 +84,20 @@ entries.post('/entries', async (c) => {
 
   const team = await getTeamById(c.env.DB, teamId);
   if (!team || team.id !== user.teamId) {
-    return c.html(dashboardPage(user, team?.name ?? 'Unknown team', [], { error: 'Invalid team selected.' }), 400);
+    return renderDashboard(c, user, { error: 'Invalid team selected.' });
   }
 
   if (!isValidDate(entryDate)) {
-    return c.html(dashboardPage(user, team.name, [], { error: 'Please select a valid date (not in the future).' }), 400);
+    return renderDashboard(c, user, { error: 'Please select a valid date (not in the future).' });
   }
 
   if (!isValidSteps(steps)) {
-    return c.html(dashboardPage(user, team.name, [], { error: 'Steps must be a whole number between 1 and 1,000,000.' }), 400);
+    return renderDashboard(c, user, { error: 'Steps must be a whole number between 1 and 1,000,000.' });
   }
 
   const imageCheck = validateImage(image);
   if (!imageCheck.ok && imageCheck.error) {
-    return c.html(dashboardPage(user, team.name, [], { error: imageCheck.error }), 400);
+    return renderDashboard(c, user, { error: imageCheck.error });
   }
 
   let imageKey: string | null = null;
@@ -93,8 +113,7 @@ entries.post('/entries', async (c) => {
     imageKey,
   });
 
-  const recentEntries = await getUserStepEntries(c.env.DB, user.userId, 10);
-  return c.html(dashboardPage(user, team.name, recentEntries, { flash: 'Entry saved.' }));
+  return renderDashboard(c, user, { flash: 'Entry saved.' });
 });
 
 entries.post('/entries/:id', async (c) => {
@@ -103,12 +122,12 @@ entries.post('/entries/:id', async (c) => {
 
   const id = Number(c.req.param('id'));
   if (!Number.isInteger(id) || id <= 0) {
-    return c.html(dashboardPage(user, '', await getUserStepEntries(c.env.DB, user.userId, 10), { error: 'Invalid entry ID.' }), 400);
+    return renderDashboard(c, user, { error: 'Invalid entry ID.' });
   }
 
   const entry = await getStepEntryById(c.env.DB, id);
   if (!entry || entry.user_id !== user.userId) {
-    return c.html(dashboardPage(user, '', await getUserStepEntries(c.env.DB, user.userId, 10), { error: 'Entry not found.' }), 404);
+    return renderDashboard(c, user, { error: 'Entry not found.' });
   }
 
   const body = await c.req.parseBody({ all: true });
@@ -116,19 +135,17 @@ entries.post('/entries/:id', async (c) => {
   const steps = String(body.steps ?? '');
   const image = body.image;
 
-  const team = await getTeamById(c.env.DB, user.teamId);
-
   if (!isValidDate(entryDate)) {
-    return c.html(dashboardPage(user, team?.name ?? '', await getUserStepEntries(c.env.DB, user.userId, 10), { error: 'Please select a valid date (not in the future).' }), 400);
+    return renderDashboard(c, user, { error: 'Please select a valid date (not in the future).' });
   }
 
   if (!isValidSteps(steps)) {
-    return c.html(dashboardPage(user, team?.name ?? '', await getUserStepEntries(c.env.DB, user.userId, 10), { error: 'Steps must be a whole number between 1 and 1,000,000.' }), 400);
+    return renderDashboard(c, user, { error: 'Steps must be a whole number between 1 and 1,000,000.' });
   }
 
   const imageCheck = validateImage(image);
   if (!imageCheck.ok && imageCheck.error) {
-    return c.html(dashboardPage(user, team?.name ?? '', await getUserStepEntries(c.env.DB, user.userId, 10), { error: imageCheck.error }), 400);
+    return renderDashboard(c, user, { error: imageCheck.error });
   }
 
   let imageKey = entry.image_key;
@@ -142,8 +159,7 @@ entries.post('/entries/:id', async (c) => {
     imageKey,
   });
 
-  const recentEntries = await getUserStepEntries(c.env.DB, user.userId, 10);
-  return c.html(dashboardPage(user, team?.name ?? 'Unknown team', recentEntries, { flash: 'Entry updated.' }));
+  return renderDashboard(c, user, { flash: 'Entry updated.' });
 });
 
 entries.get('/uploads/*', async (c) => {
