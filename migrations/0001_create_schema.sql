@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS teams (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  allowed_domains TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  password_salt TEXT NOT NULL,
+  team_id INTEGER REFERENCES teams(id),
+  status TEXT NOT NULL DEFAULT 'pending',
+  role TEXT NOT NULL DEFAULT 'user',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS step_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  team_id INTEGER NOT NULL,
+  entry_date DATE NOT NULL,
+  steps INTEGER NOT NULL CHECK (steps > 0),
+  image_key TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, entry_date)
+);

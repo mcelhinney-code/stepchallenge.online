@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "stepchallenge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "stepchallenge.online",
+      "custom_domain": true
+    }
+  ],
+  "alias": {
+    "hono": "./node_modules/hono/dist/index.js"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "stepchallenge",
+      "database_id": "c75051cb-76a1-4ff2-b2ec-b9373da07598",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "8e54ddc281324c0cb85ddad415c77e5a"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "stepchallenge-images"
+    }
+  ]
+}

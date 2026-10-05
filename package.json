@@ -1,0 +1,25 @@
+{
+  "name": "stepchallenge.ie",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply stepchallenge --local",
+    "db:migrate:remote": "wrangler d1 migrations apply stepchallenge --remote",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261005.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.147.0"
+  }
+}
