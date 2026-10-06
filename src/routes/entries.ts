@@ -341,7 +341,7 @@ entries.get('/uploads/*', async (c) => {
   const key = c.req.path.replace('/uploads/', '');
   const segments = key.split('/');
   // Expected: uploads/{eventId}/{userId}/{filename}
-  if (segments.length < 4 || segments[2] !== String(user.userId)) {
+  if (segments.length < 4 || (segments[2] !== String(user.userId) && user.role !== 'admin')) {
     return new Response('Forbidden', { status: 403 });
   }
 

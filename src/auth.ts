@@ -59,6 +59,49 @@ export function randomToken(): string {
   return bufferToHex(crypto.getRandomValues(new Uint8Array(32)).buffer as ArrayBuffer);
 }
 
+const PASSWORD_RESET_TTL_SECONDS = 60 * 15; // 15 minutes
+
+export async function createPasswordResetToken(
+  kv: KVNamespace,
+  userId: number
+): Promise<string> {
+  const token = randomToken();
+  await kv.put(`password-reset:${token}`, JSON.stringify({ userId }), {
+    expirationTtl: PASSWORD_RESET_TTL_SECONDS,
+  });
+  return token;
+}
+
+export async function getPasswordResetToken(
+  kv: KVNamespace,
+  token: string
+): Promise<number | null> {
+  const data = await kv.get(`password-reset:${token}`);
+  if (!data) return null;
+  try {
+    const parsed = JSON.parse(data) as { userId: number };
+    return parsed.userId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function consumePasswordResetToken(
+  kv: KVNamespace,
+  token: string
+): Promise<number | null> {
+  const key = `password-reset:${token}`;
+  const data = await kv.get(key);
+  if (!data) return null;
+  await kv.delete(key);
+  try {
+    const parsed = JSON.parse(data) as { userId: number };
+    return parsed.userId ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createSession(
   sessions: KVNamespace,
   user: SessionUser

@@ -1,0 +1,4 @@
+# Copy this file to .dev.vars and fill in real values for local development.
+# .dev.vars is gitignored and should never be committed.
+POSTMARK_API_TOKEN=your-postmark-server-token
+POSTMARK_FROM_EMAIL=stephen@mcelhinney.ai

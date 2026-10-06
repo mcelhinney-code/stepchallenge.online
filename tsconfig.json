@@ -6,8 +6,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": ["ESNext"],
-    "types": ["@cloudflare/workers-types"]
+    "lib": ["ESNext"]
   },
   "include": ["src", "worker-configuration.d.ts"]
 }

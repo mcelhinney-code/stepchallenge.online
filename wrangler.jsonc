@@ -30,6 +30,10 @@
     {
       "binding": "SESSIONS",
       "id": "8e54ddc281324c0cb85ddad415c77e5a"
+    },
+    {
+      "binding": "PASSWORD_RESET",
+      "id": "b4832322e2824cb5afecd2e61a32b6c6"
     }
   ],
   "r2_buckets": [
